@@ -1,0 +1,159 @@
+MainActivity
+
+package com.example.myapplication // 請保留你專案原本第 1 行的 package 名稱
+
+import android.os.Bundle
+import android.widget.Button
+import android.widget.SeekBar
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
+class MainActivity : AppCompatActivity() {
+
+    // 建立兩個數值，用於計算兔子與烏龜的進度
+    private var progressRabbit = 0
+    private var progressTurtle = 0
+
+    private lateinit var btnStart: Button
+    private lateinit var sbRabbit: SeekBar
+    private lateinit var sbTurtle: SeekBar
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        btnStart = findViewById(R.id.btnStart)
+        sbRabbit = findViewById(R.id.sbRabbit)
+        sbTurtle = findViewById(R.id.sbTurtle)
+
+        btnStart.setOnClickListener {
+            btnStart.isEnabled = false // 比賽期間，不可重複操作
+            progressRabbit = 0         // 初始化進度
+            progressTurtle = 0
+            sbRabbit.progress = 0
+            sbTurtle.progress = 0
+
+            // 執行賽跑協程
+            runRabbit()
+            runTurtle()
+        }
+    }
+
+    private fun runRabbit() {
+        lifecycleScope.launch {
+            // 兔子有三分之二的機率會偷懶
+            val sleepProbability = arrayOf(true, true, false)
+
+            while (progressRabbit <= 100 && progressTurtle < 100) {
+                delay(100) // 延遲 0.1 秒
+                // 隨機 0 ~ 2：0 和 1 為兔子休息、2 為移動
+                if (sleepProbability[(Math.random() * 3).toInt()]) {
+                    delay(300) // 兔子休息 0.3 秒
+                }
+                progressRabbit += 3 // 每次三步
+                sbRabbit.progress = progressRabbit // 直接更新進度條
+
+                // 判斷兔子是否獲勝
+                if (progressRabbit >= 100 && progressTurtle < 100) {
+                    Toast.makeText(this@MainActivity, "兔子勝", Toast.LENGTH_SHORT).show()
+                    btnStart.isEnabled = true
+                }
+            }
+        }
+    }
+
+    private fun runTurtle() {
+        lifecycleScope.launch {
+            while (progressTurtle <= 100 && progressRabbit < 100) {
+                delay(100) // 延遲 0.1 秒
+                progressTurtle += 1 // 每次一步
+                sbTurtle.progress = progressTurtle // 直接更新進度條
+
+                // 判斷烏龜是否獲勝
+                if (progressTurtle >= 100 && progressRabbit < 100) {
+                    Toast.makeText(this@MainActivity, "烏龜勝", Toast.LENGTH_SHORT).show()
+                    btnStart.isEnabled = true
+                }
+            }
+        }
+    }
+}
+
+XML
+
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="龜兔賽跑"
+        android:textColor="@android:color/black"
+        android:textSize="22sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvRabbit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="兔子"
+        android:textSize="18sp"
+        app:layout_constraintStart_toStartOf="@+id/tvTitle"
+        app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
+
+    <SeekBar
+        android:id="@+id/sbRabbit"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/tvRabbit"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/tvRabbit"
+        app:layout_constraintTop_toTopOf="@+id/tvRabbit" />
+
+    <TextView
+        android:id="@+id/tvTurtle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="烏龜"
+        android:textSize="18sp"
+        app:layout_constraintStart_toStartOf="@+id/tvTitle"
+        app:layout_constraintTop_toBottomOf="@+id/tvRabbit" />
+
+    <SeekBar
+        android:id="@+id/sbTurtle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/tvTurtle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/tvTurtle"
+        app:layout_constraintTop_toTopOf="@+id/tvTurtle" />
+
+    <Button
+        android:id="@+id/btnStart"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="開始"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvTurtle" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

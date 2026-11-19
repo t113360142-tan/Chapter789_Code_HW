@@ -1,0 +1,183 @@
+MainActivity
+
+package com.example.myapplication
+
+import android.os.Bundle
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.BaseAdapter
+import android.widget.GridView
+import android.widget.ImageView
+import android.widget.ListView
+import android.widget.Spinner
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+
+class MainActivity : AppCompatActivity() {
+
+    // 1. 定義圖文資料結構
+    class Data(var photo: Int, var name: String)
+
+    // 2. 定義共用的客製化 Adapter（必須加上 inner 才能呼叫 layoutInflater）
+    inner class MyAdapter(
+        private val dataList: Array<Data>,
+        private val layoutResId: Int
+    ) : BaseAdapter() {
+
+        override fun getCount(): Int = dataList.size
+
+        override fun getItem(position: Int): Any = dataList[position]
+
+        override fun getItemId(position: Int): Long = position.toLong()
+
+        override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
+            val view = convertView ?: layoutInflater.inflate(layoutResId, parent, false)
+            val tvName = view.findViewById<TextView>(R.id.name)
+            val ivPhoto = view.findViewById<ImageView>(R.id.imageView)
+
+            tvName.text = dataList[position].name
+            ivPhoto.setImageResource(dataList[position].photo)
+            return view
+        }
+    }
+
+    // 輔助方法：將名稱陣列與圖片 ID 陣列合併成 Data 陣列
+    private fun buildDataList(names: Array<String>, photoIds: IntArray): Array<Data> {
+        return Array(names.size) { i ->
+            Data(photoIds[i], names[i])
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        // --- 設定 Spinner（交通工具）---
+        val transNames = arrayOf("腳踏車", "機車", "汽車", "巴士", "飛機", "輪船")
+        val transPhotos = intArrayOf(
+            R.drawable.trans1, R.drawable.trans2, R.drawable.trans3,
+            R.drawable.trans4, R.drawable.trans5, R.drawable.trans6
+        )
+        val transData = buildDataList(transNames, transPhotos)
+        val spinner = findViewById<Spinner>(R.id.spinner)
+        spinner.adapter = MyAdapter(transData, R.layout.trans_list)
+
+        // --- 設定 GridView（表情圖示）---
+        val cubeeNames = arrayOf(
+            "哭哭", "發抖", "再見", "生氣", "昏倒",
+            "竊笑", "很棒", "你好", "驚嚇", "大笑"
+        )
+        val cubeePhotos = intArrayOf(
+            R.drawable.cubee1, R.drawable.cubee2, R.drawable.cubee3, R.drawable.cubee4, R.drawable.cubee5,
+            R.drawable.cubee6, R.drawable.cubee7, R.drawable.cubee8, R.drawable.cubee9, R.drawable.cubee10
+        )
+        val cubeeData = buildDataList(cubeeNames, cubeePhotos)
+        val gridView = findViewById<GridView>(R.id.gridView)
+        gridView.adapter = MyAdapter(cubeeData, R.layout.cubee_list)
+        gridView.numColumns = 3
+
+        // --- 設定 ListView（純文字訊息）---
+        val messages = arrayOf("訊息 1", "訊息 2", "訊息 3", "訊息 4", "訊息 5", "訊息 6")
+        val listView = findViewById<ListView>(R.id.listView)
+        listView.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, messages)
+    }
+}
+
+Main XML
+
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:context=".MainActivity">
+
+    <Spinner
+        android:id="@+id/spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <GridView
+        android:id="@+id/gridView"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/spinner" />
+
+    <ListView
+        android:id="@+id/listView"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/gridView" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+Cubee XML
+
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_margin="5dp" />
+
+    <TextView
+        android:id="@+id/name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="name"
+        android:textSize="15sp"
+        android:gravity="center" />
+
+</LinearLayout>
+
+Trans XML
+
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_margin="5dp" />
+
+    <TextView
+        android:id="@+id/name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginEnd="5dp"
+        android:gravity="start"
+        android:text="name"
+        android:textSize="15sp" />
+
+</LinearLayout>
